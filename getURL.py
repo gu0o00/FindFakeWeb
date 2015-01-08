@@ -22,4 +22,3 @@ if __name__ == '__main__':
     url = 'http://site.baidu.com/'
     localfile = "List/WhiteList.txt"
     getUrl(url,localfile)
-
