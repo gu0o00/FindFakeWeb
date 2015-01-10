@@ -18,19 +18,14 @@ def DownloadWeb(url):
     #request.get_method = lambda: 'PUT'
     try:
         page = urllib2.urlopen(req).read()
-        print "page info is: ",page
-        for i in range(5):
-            print
-        print "after paser is: ",BeautifulSoup(page)
-        localfile = open('/home/guojian/webhtml','w')
-        localfile.write(page)
-        localfile.close()
+        html = BeautifulSoup(page)
     except urllib2.HTTPError, e:
         print "Error Code:",e.code
     except urllib2.URLError, e:
         print "Error Reason:",e.reason
+    return html
 
 if __name__ == '__main__':
     #url = 'http://blog.csdn.net/wklken/article/details/7364390'
-    url = "http://www.hao123.com/?1420687830"
-    DownloadWeb(url)
+    url = "http://www.hao123.com"
+    print DownloadWeb(url)
