@@ -20,11 +20,11 @@ def getUrl(startUrl):
         re_find = re.compile('.+?href=\"(http.+?)\"')
         reslist = re_find.findall(html)
         print len(reslist)
+        return reslist
     except urllib2.HTTPError, e:
         print "Error Code:",e.code
     except urllib2.URLError, e:
         print "Error Reason:",e.reason
-    return reslist
 
 if __name__ == '__main__':
     url_white = 'http://hao.360.cn'
