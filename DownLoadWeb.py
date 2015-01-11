@@ -3,7 +3,7 @@ __author__ = 'guojian'
 import urllib2,socket
 from BeautifulSoup import BeautifulSoup
 def DownloadWeb(url):
-    socket.setdefaulttimeout(5)
+    socket.setdefaulttimeout(50)
     #可以加入参数（无参数使用get，以下方式使用post）
     #params = {"wd":"a","b":"2"}
     #加入请求头信息，以便识别
@@ -18,14 +18,16 @@ def DownloadWeb(url):
     #request.get_method = lambda: 'PUT'
     try:
         page = urllib2.urlopen(req).read()
-        html = BeautifulSoup(page)
+        assert isinstance (page,str )
+        return page
     except urllib2.HTTPError, e:
         print "Error Code:",e.code
     except urllib2.URLError, e:
         print "Error Reason:",e.reason
-    return html
+
 
 if __name__ == '__main__':
-    #url = 'http://blog.csdn.net/wklken/article/details/7364390'
-    url = "http://www.hao123.com"
+    #url = 'http://riching.iteye.com/blog/1968769'
+    #url = "http://www.hao123.com"
+    url = 'http://www.sotrip.com/overchina/jycy.php'
     print DownloadWeb(url)

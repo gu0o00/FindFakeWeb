@@ -31,7 +31,7 @@ def parserXML(xml):
     return xmlparser.inlist
 
 if __name__ == '__main__':
-    resList = parserXML('verified_online.xml.bak')
+    resList = parserXML('verified_online.xml')
     BlackFile = open('List/BlackList.txt','w')
     import os
     for item in resList:
