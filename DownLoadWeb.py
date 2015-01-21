@@ -2,7 +2,14 @@ __author__ = 'guojian'
 #coding=utf-8
 import urllib2,socket
 from BeautifulSoup import BeautifulSoup
-def DownloadWeb(url):
+def UseProxy():
+    import socks,socket
+    enable_proxy = False
+    socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5,'127.0.0.1',7070)
+    socket.socket = socks.socksocket
+def DownloadWeb(url,enable_proxy = False):
+    if enable_proxy == True:
+        UseProxy()
     socket.setdefaulttimeout(50)
     #可以加入参数（无参数使用get，以下方式使用post）
     #params = {"wd":"a","b":"2"}

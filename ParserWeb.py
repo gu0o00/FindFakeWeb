@@ -35,9 +35,34 @@ class ParserWeb:
             return info[2].text
         else:
             return "该网站暂无备案"
+    def parserLink(self):
+        '分析网站的链接对象，统计出指向本站链接和外站链接的个数'
+        allLink = []
+        page = DownloadWeb(self.url)
+        in_count = 0
+        out_count = 0
+        if page != None:
+            html = BeautifulSoup(page)
+            allLink = html.findAll('a')
+            l = self.url_parse.netloc.split('.')
+            l.pop(0)
+            loc_net = '.'.join(l)
+            print loc_net
+            for alink in allLink:
+                alink = alink.get('href')
+                if loc_net not in str(alink) and 'http:' in str(alink):
+                    out_count += 1
+                    #print alink
+                else:
+                    in_count += 1
+                    #print alink
+        res = [len(allLink),in_count,out_count]
+        return res
 
 if __name__ == '__main__':
-    pw = ParserWeb('http://www.baidu.com')
-    print pw.isIP()
-    print pw.underlineCount()
-    print pw.isCopyright()
+    url = 'http://ent.sina.com.cn/download/'
+    pw = ParserWeb(url)
+    #print pw.isIP()
+    #print pw.underlineCount()
+    #print pw.isCopyright()
+    print '网站的链接个数:',pw.parserLink()
