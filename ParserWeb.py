@@ -35,9 +35,24 @@ class ParserWeb:
             return info[2].text
         else:
             return "该网站暂无备案"
+        page = DownloadWeb(self.url) #尝试从本网站获取备案号
+    def urlAge(self):
+        '判断域名注册年龄'
+        seourl = 'http://seo.chinaz.com/?host='
+        target = self.url.replace(':','%3a').replace('/','%2f')
+        page = DownloadWeb(seourl + target)
+        html = BeautifulSoup(page)
+        info = html.findAll('font',attrs={'color':'blue'})
+        if len(info) > 1:
+            return info[3].text
+        else:
+            return '注册时间无法获取'
 
 if __name__ == '__main__':
-    pw = ParserWeb('http://www.baidu.com')
+    url = 'http://www.21fj.com/'
+    print url
+    pw = ParserWeb(url)
     print pw.isIP()
     print pw.underlineCount()
     print pw.isCopyright()
+    print pw.urlAge()
