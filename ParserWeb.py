@@ -49,8 +49,8 @@ class ParserWeb:
             loc_net = '.'.join(l)
             print loc_net
             for alink in allLink:
-                alink = alink.get('href')
-                if loc_net not in str(alink) and 'http:' in str(alink):
+                alink = str(alink.get('href').encode('utf-8'))
+                if loc_net not in alink and 'http:' in alink:
                     out_count += 1
                     #print alink
                 else:
@@ -58,11 +58,24 @@ class ParserWeb:
                     #print alink
         res = [len(allLink),in_count,out_count]
         return res
-
+    def urlAge(self):
+        '判断域名注册年龄'
+        seourl = 'http://seo.chinaz.com/?host='
+        target = self.url.replace(':','%3a').replace('/','%2f')
+        page = DownloadWeb(seourl + target)
+        html = BeautifulSoup(page)
+        info = html.findAll('font',attrs={'color':'blue'})
+        if len(info) > 1:
+            return info[3].text
+        else:
+            return '注册时间无法获取'
+    
 if __name__ == '__main__':
-    url = 'http://ent.sina.com.cn/download/'
+    url = 'http://www.21fj.com/'
+    print url
     pw = ParserWeb(url)
-    #print pw.isIP()
-    #print pw.underlineCount()
-    #print pw.isCopyright()
+    print pw.isIP()
+    print pw.underlineCount()
+    print pw.isCopyright()
     print '网站的链接个数:',pw.parserLink()
+    print pw.urlAge()
