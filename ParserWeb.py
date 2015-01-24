@@ -8,9 +8,11 @@ from DownLoadWeb import DownloadWeb
 import re
 
 class ParserWeb:
-    def __init__(self,url):
+    '单纯的对一个url页面进行分析'
+    def __init__(self,url,page = None):
         self.url = url
         self.url_parse = urlparse(url)
+        self.page = page
         pass
     def isIP(self):
         '判断url中是否包含IP'
@@ -38,24 +40,29 @@ class ParserWeb:
     def parserLink(self):
         '分析网站的链接对象，统计出指向本站链接和外站链接的个数'
         allLink = []
-        page = DownloadWeb(self.url)
+        if self.page is None:
+            self.page = DownloadWeb(self.url)
         in_count = 0
         out_count = 0
-        if page != None:
-            html = BeautifulSoup(page)
+        if self.page is not None:
+            html = BeautifulSoup(self.page)
             allLink = html.findAll('a')
             l = self.url_parse.netloc.split('.')
             l.pop(0)
             loc_net = '.'.join(l)
-            print loc_net
-            for alink in allLink:
-                alink = str(alink.get('href').encode('utf-8'))
-                if loc_net not in alink and 'http:' in alink:
-                    out_count += 1
-                    #print alink
-                else:
-                    in_count += 1
-                    #print alink
+            try:
+                for alink in allLink:
+                    if alink is None:
+                        continue
+                    alink = str(alink.get('href').encode('utf-8'))
+                    if loc_net not in alink and 'http:' in alink:
+                        out_count += 1
+                        #print alink
+                    else:
+                        in_count += 1
+                        #print alink
+            except AttributeError,e:
+                print e,alink
         res = [len(allLink),in_count,out_count]
         return res
     def urlAge(self):
@@ -69,6 +76,14 @@ class ParserWeb:
             return info[3].text
         else:
             return '注册时间无法获取'
+    def comParser(self):
+        resList = [self.url]
+        resList.append(self.isIP())
+        resList.append(self.underlineCount())
+        resList.append(self.isCopyright())
+        resList.append(self.parserLink())
+        resList.append(self.urlAge())
+        return resList
     
 if __name__ == '__main__':
     url = 'http://www.21fj.com/'
