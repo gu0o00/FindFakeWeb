@@ -8,9 +8,9 @@ def UseProxy():
     socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5,'127.0.0.1',7070)
     socket.socket = socks.socksocket
 def DownloadWeb(url,enable_proxy = False):
-    if enable_proxy == True:
+    if enable_proxy :
         UseProxy()
-    socket.setdefaulttimeout(50)
+    socket.setdefaulttimeout(8)
     #可以加入参数（无参数使用get，以下方式使用post）
     #params = {"wd":"a","b":"2"}
     #加入请求头信息，以便识别
@@ -28,6 +28,7 @@ def DownloadWeb(url,enable_proxy = False):
         assert isinstance (page,str )
         return page
     except urllib2.HTTPError, e:
+        print 'this url is :' ,url
         print "Error Code:",e.code
     except urllib2.URLError, e:
         print "Error Reason:",e.reason
