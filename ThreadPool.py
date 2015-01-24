@@ -59,19 +59,23 @@ class WorkerManager:
 
 if __name__ == '__main__':
     def test_job(id,sleep = 0.001):
+        sum = 0
+        time.sleep(sleep)
         try:
-            sum = 0
             for i in range(10000):
                 sum += i
         except:
             print '[%4d]' % id, sys.exc_info()[:2]
-        return id
+        return sum
     def test():
         print 'start testing...'
         wm = WorkerManager(10)
         for i in range(5):
             wm.add_job(test_job, i, i*0.001)
         wm.wait_for_complete()
+        print 'result Queue \'s length == %d ' % wm.resultQueue.qsize()
+        while wm.resultQueue.qsize():
+            print wm.resultQueue.get()
         print '...end testing'
 
     test()
