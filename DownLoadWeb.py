@@ -30,8 +30,13 @@ def DownloadWeb(url,enable_proxy = False):
     except urllib2.HTTPError, e:
         print 'this url is :' ,url
         print "Error Code:",e.code
+        return None
     except urllib2.URLError, e:
         print "Error Reason:",e.reason
+        return None
+    except Exception,e:
+        print e
+        return None
 
 
 if __name__ == '__main__':

@@ -52,7 +52,7 @@ class ParserWeb:
             loc_net = '.'.join(l)
             try:
                 for alink in allLink:
-                    if alink is None:
+                    if alink is None or alink.get('href') is None:
                         continue
                     alink = str(alink.get('href').encode('utf-8'))
                     if loc_net not in alink and 'http:' in alink:
