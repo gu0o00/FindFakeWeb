@@ -1,8 +1,4 @@
-http://ddt.sina.com.cn/
-http://www.sina.com.cn/
-http://ddt.sina.com.cn
-http://rss.sina.com.cn
-http://www.sina.com.cn/ddt/dlfast_index.html
+http://www.soufun.com/asp/finance/financingconsultant/HyperTool_calBuyHouse.asp
 http://weather.sina.com.cn/
 http://www.ip138.com/
 http://www.skycn.com/soft/6909.html
@@ -10,7 +6,6 @@ http://train.hepost.com/
 http://local.sina.com.cn/
 http://www.fh21.com.cn/xx/anquan.htm
 http://www.cctv.com/tvguide/index.shtml
-http://www.xichang.tv/calendar.htm
 http://online.rising.com.cn/
 http://finance.21cn.com/bank/computer/tax.html
 http://stock.sina.com.cn/

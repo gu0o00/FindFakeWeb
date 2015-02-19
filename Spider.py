@@ -83,6 +83,7 @@ class ParserManager(Thread):
                 print '出现异常:',e
         sleep(1)
         print '程序正常退出'
+
 if __name__ == '__main__':
     try:
         queue = Queue()

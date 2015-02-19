@@ -19,10 +19,13 @@ class HandleXML(ContentHandler):
         pass
 
     def characters(self, content):
-        content = content.strip()
-        if len(content)>0 and self.__isurl__:
-            #print 'chars',content
-            self.inlist.append(content)
+        try:
+            #content = content.strip()
+            if len(content)>0 and self.__isurl__:
+                print content
+                self.inlist.append(content)
+                self.__isurl__ = False
+        except SAXParseException,e:
             self.__isurl__ = False
 
 def parserXML(xml):
@@ -35,5 +38,8 @@ if __name__ == '__main__':
     BlackFile = open('List/BlackList.txt','w')
     import os
     for item in resList:
-        BlackFile.write(item + os.linesep)
+        try:
+            BlackFile.write(item + os.linesep)
+        except :
+            pass
     BlackFile.close()

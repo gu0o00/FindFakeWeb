@@ -4,9 +4,11 @@ import urllib2,socket
 from BeautifulSoup import BeautifulSoup
 def UseProxy():
     import socks,socket
-    enable_proxy = False
+    enable_proxy = True
     socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5,'127.0.0.1',7070)
     socket.socket = socks.socksocket
+def NoProxy():
+    enable_proxy = False
 def DownloadWeb(url,enable_proxy = False):
     if enable_proxy :
         UseProxy()
