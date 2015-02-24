@@ -20,9 +20,9 @@ class HandleXML(ContentHandler):
 
     def characters(self, content):
         try:
-            #content = content.strip()
+            content = content.strip()
             if len(content)>0 and self.__isurl__:
-                print content
+                #print content
                 self.inlist.append(content)
                 self.__isurl__ = False
         except SAXParseException,e:
