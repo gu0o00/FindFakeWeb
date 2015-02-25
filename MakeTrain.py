@@ -93,6 +93,41 @@ def TrainBlack(filename = 'List/BlackList.txt'):
         count += 1
         print '黑名单构造向量特征训练库完成第' + str(count) + '个'
     BlkTrain.close()
+def MakeSVMFormat(parse_res):
+    res = parse_res
+    dictList = []
+    aDict = {1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0}
+    ########################
+    alineres = '-1 '
+    if res[1] == False:
+        aDict[1] = 0
+    else :
+        aDict[1] = 1
+    ########################
+    aDict[2] = res[2]
+    ########################
+    #print res[3]
+    if res[3] == "该网站暂无备案" or res[3] == None:
+        aDict[3] = 0
+    else :
+        aDict[3] = 1
+    ########################
+    aDict[4] = res[4][0]
+    aDict[5] = res[4][1]
+    aDict[6] = res[4][2]
+    ########################
+    try:
+        time_str = res[5]
+        year = time_str.split('年'.decode('utf-8'))
+        month = year[1].split('月'.decode('utf-8'))
+        day = month[1].split('天'.decode('utf-8'))
+        time = int(year[0]) * 365 + int(month[0]) * 30 + int(day[0])
+    except :
+        time = '0 '
+    aDict[7] = time
+    dictList.append(aDict)
+    return dictList
+
 
 if __name__ == '__main__':
     #import threading
