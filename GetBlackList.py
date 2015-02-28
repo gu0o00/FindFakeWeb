@@ -35,6 +35,7 @@ def parserXML(xml):
 
 if __name__ == '__main__':
     resList = parserXML('verified_online.xml')
+    print '获取到的链接数:' + str(len(resList))
     BlackFile = open('List/BlackList.txt','w')
     import os
     for item in resList:

@@ -153,8 +153,11 @@ class FindFakeWebFrame(wx.Frame):
     def OnStart(self,event):
         #wx.MessageBox('开始','提示:')
         startUrl = str(self.txtUrl.Value)
+        startUtlList = str(self.txtUrl.Value).split(';')
         self.thdNum = int(self.thdNumTxt.Value)
         self.issave = self.issaveChk.GetValue()
+        self.spiders = []
+        self.parsers = []
         self.finishCount = 1
         self.urlCount = 0
         self.fakeCount = 0
@@ -162,15 +165,21 @@ class FindFakeWebFrame(wx.Frame):
         from Queue import Queue
         self.queue = Queue()
         for i in range(self.thdNum):
-            self.spider = SpiderGUI.Spider('s'+str(i),self.queue,startUrl)
-            self.parser = SpiderGUI.ParserManager('p'+str(i),self.queue,self.issave)
-            self.spider.start()
-            self.parser.start()
-            self.startBtn.Disable()
+            if i < len(startUtlList)-1:
+                spider = SpiderGUI.Spider('s'+str(i),self.queue,startUtlList[i])
+            else:
+                spider = SpiderGUI.Spider('s'+str(i),self.queue,startUtlList[len(startUtlList)-1])
+            parser = SpiderGUI.ParserManager('p'+str(i),self.queue,self.issave)
+            self.spiders.append(spider)
+            self.parsers.append(parser)
+            spider.start()
+            parser.start()
+        self.startBtn.Disable()
     def OnEnd(self,event):
         #wx.MessageBox('终止','提示:')
-        self.spider.is_alive = False
-        self.parser.is_alive = False
+        for i in range(self.thdNum):
+            self.spiders[i].is_alive = False
+            self.parsers[i].is_alive = False
         self.startBtn.Enable()
     def UpdateProc(self,msg):
         info = str(msg.data)
@@ -189,7 +198,7 @@ class FindFakeWebFrame(wx.Frame):
     def UpdateStatus2(self,msg):
         num = int(msg.data)
         self.fakeCount += num
-        self.statusBar.SetStatusText('已发现可疑网站数量:'+str(self.fakeCount)+'个')
+        self.statusBar.SetStatusText('已发现可疑网站数量:'+str(self.fakeCount)+'个',2)
 
 
 class LookListDialog(wx.Dialog):
@@ -326,10 +335,10 @@ class UpdateBlackDialog(wx.Dialog):
     def OnUpdate(self,event):
         from GetBlackList import parserXML
         self.resList = parserXML(self.path)
-        self.info.SetLabel('获取到钓鱼网站URL'+str(len(resList))+'个')
+        self.info.SetLabel('获取到钓鱼网站URL'+str(len(self.resList))+'个')
         for alink in self.resList:
             self.cont.Value += str(alink) + os.linesep
-        self.cont.SetPosition(self.cont.GetLastPosition())
+        self.cont.ShowPosition(self.cont.GetLastPosition())
     def OnSave(self,event):
         fp = open('List/BlackList.txt','w')
         for alink in self.resList:
@@ -376,9 +385,10 @@ class UpdateWhiteListWorker(threading.Thread):
                 wx.CallAfter(Publisher().sendMessage,'update',str(link))
 
 class MakeBlackFetDialog(wx.Dialog):
-    def __init__(self,parent,title,path):
+    def __init__(self,parent,title,path,isproxy):
         wx.Dialog.__init__(self,parent,title = title,size=(600,400))
         self.path = path
+        self.isproxy = isproxy
         self.panel = wx.Panel(self)
 
         topBox = wx.BoxSizer(wx.HORIZONTAL)
@@ -412,7 +422,7 @@ class MakeBlackFetDialog(wx.Dialog):
         self.Show()
         Publisher().subscribe(self.UpdateDisplay,'UpdateBlackTrainer')
     def OnUpdate(self,event):
-        self.thd = UpdateBlackTrainerWorker(self.path)
+        self.thd = UpdateBlackTrainerWorker(self.path,self.isproxy)
         self.thd.start()
         self.count = 0
         self.updateBtn.Disable()
@@ -423,6 +433,7 @@ class MakeBlackFetDialog(wx.Dialog):
         txt = str(msg.data)
         if not txt.startswith('#'):
             self.cont.Value += txt + os.linesep
+            #self.cont.SetValue(str(self.cont.Value)+txt+os.linesep)
             self.count += 1
         else:
             self.cont.SetValue(str(self.cont.Value) + txt)
@@ -448,6 +459,9 @@ class UpdateBlackTrainerWorker(threading.Thread):
             #print aLink
             pw = ParserWeb(aLink,self.isproxy)
             res = pw.comParser()
+            if res is False:
+                wx.CallAfter(Publisher().sendMessage,'UpdateBlackTrainer',str('网页获取失败'))
+                continue
             ########################
             alineres = '-1 '
             if res[1] == False:
@@ -560,6 +574,9 @@ class UpdateWhiteTrainerWorker(threading.Thread):
             #print aLink
             pw = ParserWeb(aLink)
             res = pw.comParser()
+            if res is False:
+                print '网页获取失败'
+                continue
             ########################
             alineres = '1 '             ##如果直接复用代码，别忘了修改这里
             if res[1] == False:
@@ -654,10 +671,12 @@ class MakeModelDialog(wx.Dialog):
         tf.close()
         self.infoTxt.SetValue(str(self.infoTxt.Value.encode('utf-8'))+wf+bf+os.linesep)
         self.infoTxt.SetValue(str(self.infoTxt.Value.encode('utf-8')) +'文件合并完成' + os.linesep)
+        self.infoTxt.ShowPosition(self.infoTxt.GetLastPosition())
         y, x = svmutil.svm_read_problem('train/t.train')
         model = svmutil.svm_train(y, x, '-c 5')
         svmutil.svm_save_model('model_file.model',model)
         self.infoTxt.SetValue(str(self.infoTxt.Value.encode('utf-8')) +'训练模型构造完成，并且保存为文件model_file.model' + os.linesep)
+        self.infoTxt.ShowPosition(self.infoTxt.GetLastPosition())
     def OnEnd(self,event):
         self.Close()
 

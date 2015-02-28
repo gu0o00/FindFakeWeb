@@ -64,6 +64,9 @@ class ParserManager(Thread):
                 pw = ParserWeb(url)
                 print '开始分析url:',url
                 res = pw.comParser()
+                if res == False:
+                    print '网页无法获取'
+                    continue
                 print res[0],res[1],res[2],res[3].encode('utf-8'),res[4],res[5]
                 tofile = str(res[0]) + os.linesep                   #url
                 tofile += str(res[1]) + ','                         #是否包含ip地址

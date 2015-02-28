@@ -14,7 +14,17 @@ class ParserWeb:
         self.url_parse = urlparse(url)
         self.page = None
         self.enable_proxy = enable_proxy
-        pass
+        self.html = None
+        self.page = DownloadWeb(self.url,self.enable_proxy)
+        if self.page == None:
+            self.flag = False
+        else:
+            self.html = BeautifulSoup(self.page)
+
+        if self.html == None:
+            self.flag = False
+        else:
+            self.flag = True
     def isIP(self):
         '判断url中是否包含IP'
         re_ip = "(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[0-9]{1,2})(\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[0-9]{1,2})){3}"
@@ -43,13 +53,11 @@ class ParserWeb:
     def parserLink(self):
         '分析网站的链接对象，统计出指向本站链接和外站链接的个数'
         allLink = []
-        if self.page is None:
-            self.page = DownloadWeb(self.url,self.enable_proxy)
+
         in_count = 0
         out_count = 0
         if self.page is not None:
-            self.html = BeautifulSoup(self.page)
-            allLink = html.findAll('a')
+            allLink = self.html.findAll('a')
             l = self.url_parse.netloc.split('.')
             l.pop(0)
             loc_net = '.'.join(l)
@@ -65,7 +73,7 @@ class ParserWeb:
                         in_count += 1
                         #print alink
             except AttributeError,e:
-                print e,alink
+                print e,aLink
         res = [len(allLink),in_count,out_count]
         return res
     def urlAge(self):
@@ -91,6 +99,8 @@ class ParserWeb:
         return len(imgList)
     def comParser(self):
         resList = [self.url]
+        if self.flag is False:
+            return False
         resList.append(self.isIP())
         resList.append(self.underlineCount())
         resList.append(self.isCopyright())
@@ -102,14 +112,15 @@ class ParserWeb:
         return resList
     
 if __name__ == '__main__':
-    url = 'http://www.21fj.com/'
+    url = 'http://www.freshfruitgroup.com/Irs.gov.htm' #test proxy
     print url
-    pw = ParserWeb(url)
-    print pw.isIP()
-    print pw.underlineCount()
-    print pw.isCopyright()
-    print '网站的链接个数:',pw.parserLink()
-    print pw.urlAge()
-    print pw.urlLen()
-    print pw.FormCount()
-    print pw.ImgCount()
+    pw = ParserWeb(url,True)
+    print pw.comParser()
+    #print pw.isIP()
+    #print pw.underlineCount()
+    #print pw.isCopyright()
+    #print '网站的链接个数:',pw.parserLink()
+    #print pw.urlAge()
+    #print pw.urlLen()
+    #print pw.FormCount()
+    #print pw.ImgCount()
