@@ -71,6 +71,9 @@ class ParserManager(Thread):
                 tofile +=  unicode(res[3]).encode('utf-8') + ','    #ICP号
                 tofile +=  str(res[4]) + ','                        #链接统计
                 tofile += unicode(res[5]).encode('utf-8')           #注册年龄
+                tofile += str(res[6])                               #url长度
+                tofile += str(res[7])                               #表单数
+                tofile += str(res[8])                               #图片数
                 file_res.write(tofile + os.linesep)
                 file_res.close()
             except UnicodeEncodeError,e:

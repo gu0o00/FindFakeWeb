@@ -42,6 +42,9 @@ def TrainWhite(filename = 'List/WhiteList.txt'):
         except :
             time = '0 '
         alineres += "7:" + str(time) + " "
+        alineres += "8:" + str(res[6]) + " "
+        alineres += "9:" + str(res[7]) + " "
+        alineres += "10:" + str(res[8]) + " "
         ########################
         print res
         WhtTrain.write(alineres + os.linesep)
@@ -86,7 +89,10 @@ def TrainBlack(filename = 'List/BlackList.txt'):
             time = int(year[0]) * 365 + int(month[0]) * 30 + int(day[0])
         except :
             time = '0 '
-        alineres += "7:" + str(time) + " "
+        alineres += "7:" + str(res[5]) + " "
+        alineres += "8:" + str(res[6]) + " "
+        alineres += "9:" + str(res[7]) + " "
+        alineres += "10:" + str(res[8]) + " "
         ########################
         print res
         BlkTrain.write(alineres + os.linesep)
@@ -125,6 +131,11 @@ def MakeSVMFormat(parse_res):
     except :
         time = '0 '
     aDict[7] = time
+    ########################
+    aDict[8] = res[6]
+    aDict[9] = res[7]
+    aDict[10] = res[8]
+    ########################
     dictList.append(aDict)
     return dictList
 

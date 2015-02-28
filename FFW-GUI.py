@@ -49,20 +49,29 @@ class FindFakeWebFrame(wx.Frame):
         lable = wx.StaticText(panel, -1, '爬虫开始的URL:')
         self.txtUrl = wx.TextCtrl(panel,-1)
         self.txtUrl.SetMinSize((400,-1))
+        self.txtUrl.SetValue('http://www.sohu.com')
 
         topBox.Add(lable,proportion = 0,flag=wx.EXPAND|wx.SHAPED)
         topBox.Add(self.txtUrl,proportion = 1,flag = wx.EXPAND|wx.RIGHT|wx.LEFT, border = 5)
         ######################################################
         midBox = wx.BoxSizer(wx.HORIZONTAL)
+        self.isproxyChk = wx.CheckBox(panel,-1,'对黑名单使用代理')
+        self.isproxyChk.SetValue(True)
+        self.issaveChk = wx.CheckBox(panel,-1,'将结果保存到文件')
+        self.issaveChk.SetValue(True)
+        thdnumLab = wx.StaticText(panel,-1,'线程数:')
+        self.thdNumTxt = wx.TextCtrl(panel,-1,'1')
+        self.thdNumTxt.SetMaxSize((25,20))
         self.startBtn = wx.Button(panel, label = '开始')
         self.Bind(wx.EVT_BUTTON,self.OnStart,self.startBtn)
         endBtn = wx.Button(panel, label = '终止')
         self.Bind(wx.EVT_BUTTON,self.OnEnd,endBtn)
-        setBtn = wx.Button(panel, label = '设置')
-        self.Bind(wx.EVT_BUTTON,self.OnSetup,setBtn)
+        midBox.Add(self.isproxyChk)
+        midBox.Add(self.issaveChk)
+        midBox.Add(thdnumLab)
+        midBox.Add(self.thdNumTxt)
         midBox.Add(self.startBtn,proportion=1,flag=wx.RIGHT)
         midBox.Add(endBtn,proportion=1,flag=wx.RIGHT)
-        midBox.Add(setBtn,proportion=1,flag=wx.RIGHT)
         ########################################################
         footBox = wx.BoxSizer(wx.HORIZONTAL)
         footBoxLeft = wx.BoxSizer(wx.VERTICAL)
@@ -86,8 +95,9 @@ class FindFakeWebFrame(wx.Frame):
         bigBox.Add(titleBox)
         bigBox.Add(topBox,proportion=0,flag=wx.EXPAND|wx.LEFT|wx.RIGHT)
         bigBox.Add(midBox,flag=wx.ALIGN_RIGHT|wx.RIGHT)
-        bigBox.Add(footBox,proportion=1,flag=wx.EXPAND|wx.ALL,border=5)
-        bigBox.Add(self.fakeUrlTxt,proportion=1,flag=wx.EXPAND|wx.BOTTOM,border=10)
+        bigBox.Add(footBox,proportion=1,flag=wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP,border=5)
+        ######这里布局有问题明天继续完善#######
+        #bigBox.Add(self.fakeUrlTxt,proportion=1,flag=wx.ALIGN_BOTTOM|wx.EXPAND)
         panel.SetSizer(bigBox)
         #########################################################
         self.statusBar = self.CreateStatusBar()
@@ -102,6 +112,8 @@ class FindFakeWebFrame(wx.Frame):
         Publisher().subscribe(self.UpdateStatus1,'UpdateUrlNum') #显示队列中剩余的链接数
         Publisher().subscribe(self.UpdateStatus2,'UpdateFakeNum') #显示发现的可疑链接数
 
+        self.thdNum = 1
+
         self.Show()
     def _test(self,event):
         wx.MessageBox('haha','测试提示：')
@@ -111,7 +123,7 @@ class FindFakeWebFrame(wx.Frame):
         self.statusBar.SetStatusText(st,3)
     def OnLookBlackList(self,event):
         #wx.MessageBox('查看黑名单','提示:')
-        win = LookListFrame(self,'查看','List/BlackList.txt')
+        win = LookListDialog(self,'查看','List/BlackList.txt')
         win.ShowModal()
     def OnUpdateBlackList(self,event):
         #wx.MessageBox('更新黑名单','提示:')
@@ -119,7 +131,7 @@ class FindFakeWebFrame(wx.Frame):
         win.ShowModal()
     def OnLookWhiteList(self,event):
         #wx.MessageBox('查看白名单','提示:')
-        win = LookListFrame(self,'查看','List/WhiteList.txt')
+        win = LookListDialog(self,'查看','List/WhiteList.txt')
         win.ShowModal()
     def OnUpdateWhiteList(self,event):
         #wx.MessageBox('更新白名单','提示:')
@@ -127,7 +139,8 @@ class FindFakeWebFrame(wx.Frame):
         win.ShowModal()
     def OnMakeBlackFet(self,event):
         #wx.MessageBox('构造黑名单特征值','提示:')
-        win = MakeBlackFetDialog(self,'更新黑名单样本训练库','List/BlackList.txt')
+        isproxy = self.issaveChk.GetValue()
+        win = MakeBlackFetDialog(self,'更新黑名单样本训练库','List/BlackList.txt',isproxy)
         win.ShowModal()
     def OnMakeWhiteFet(self,event):
         #wx.MessageBox('构造白名单特征值','提示:')
@@ -135,32 +148,30 @@ class FindFakeWebFrame(wx.Frame):
         win.ShowModal()
     def OnMakeTrainer(self,event):
         #wx.MessageBox('构造样本特征训练库','提示:')
-        win = MakeModel(self)
+        win = MakeModelDialog(self)
         win.ShowModal()
     def OnStart(self,event):
         #wx.MessageBox('开始','提示:')
-        self.txtUrl.SetValue('http://www.sohu.com')
         startUrl = str(self.txtUrl.Value)
+        self.thdNum = int(self.thdNumTxt.Value)
+        self.issave = self.issaveChk.GetValue()
         self.finishCount = 1
         self.urlCount = 0
         self.fakeCount = 0
         import SpiderGUI
         from Queue import Queue
         self.queue = Queue()
-        self.spider = SpiderGUI.Spider('s1',self.queue,startUrl)
-        self.parser = SpiderGUI.ParserManager('p1',self.queue)
-        self.spider.start()
-        self.parser.start()
-        #self.spider.join()
-        #self.parser.join()
-        self.startBtn.Disable()
+        for i in range(self.thdNum):
+            self.spider = SpiderGUI.Spider('s'+str(i),self.queue,startUrl)
+            self.parser = SpiderGUI.ParserManager('p'+str(i),self.queue,self.issave)
+            self.spider.start()
+            self.parser.start()
+            self.startBtn.Disable()
     def OnEnd(self,event):
         #wx.MessageBox('终止','提示:')
         self.spider.is_alive = False
         self.parser.is_alive = False
         self.startBtn.Enable()
-    def OnSetup(self,event):
-        wx.MessageBox('设置','提示:')
     def UpdateProc(self,msg):
         info = str(msg.data)
         self.flText.SetValue(self.flText.Value.encode('utf-8')+info+os.linesep)
@@ -181,7 +192,7 @@ class FindFakeWebFrame(wx.Frame):
         self.statusBar.SetStatusText('已发现可疑网站数量:'+str(self.fakeCount)+'个')
 
 
-class LookListFrame(wx.Dialog):
+class LookListDialog(wx.Dialog):
     def __init__(self,parent,title,filepath):
         wx.Dialog.__init__(self,parent,title = title,size=(600,200))
         self.path = filepath
@@ -418,10 +429,11 @@ class MakeBlackFetDialog(wx.Dialog):
         self.info.SetLabel('已经完成'+str(self.count)+'个')
 
 class UpdateBlackTrainerWorker(threading.Thread):
-    def __init__(self,path):
+    def __init__(self,blacklistpath,isproxy=True):
         threading.Thread.__init__(self)
         self.is_alive = True
-        self.path = path
+        self.path = blacklistpath
+        self.isproxy = isproxy
     def run(self):
         from ParserWeb import ParserWeb
         filename = self.path
@@ -434,7 +446,7 @@ class UpdateBlackTrainerWorker(threading.Thread):
             if not self.is_alive:
                 break
             #print aLink
-            pw = ParserWeb(aLink,True)
+            pw = ParserWeb(aLink,self.isproxy)
             res = pw.comParser()
             ########################
             alineres = '-1 '
@@ -464,6 +476,9 @@ class UpdateBlackTrainerWorker(threading.Thread):
             except :
                 time = '0 '
             alineres += "7:" + str(time) + " "
+            alineres += "8:" + str(res[6]) + " "
+            alineres += "9:" + str(res[7]) + " "
+            alineres += "10:" + str(res[8]) + " "
             ########################
             print res
             BlkTrain.write(alineres + os.linesep)
@@ -573,6 +588,9 @@ class UpdateWhiteTrainerWorker(threading.Thread):
             except :
                 time = '0 '
             alineres += "7:" + str(time) + " "
+            alineres += "8:" + str(res[6]) + " "
+            alineres += "9:" + str(res[7]) + " "
+            alineres += "10:" + str(res[8]) + " "
             ########################
             print res
             BlkTrain.write(alineres + os.linesep)
@@ -582,7 +600,7 @@ class UpdateWhiteTrainerWorker(threading.Thread):
         BlkTrain.close()
         wx.CallAfter(Publisher().sendMessage,'UpdateWhiteTrainer',str('#结果已写入文件'))
 
-class MakeModel(wx.Dialog):
+class MakeModelDialog(wx.Dialog):
     def __init__(self,parent,title='构造训练模型'):
         wx.Dialog.__init__(self,parent=parent,title=title,size=(400,300))
         panel = wx.Panel(self)
@@ -643,7 +661,42 @@ class MakeModel(wx.Dialog):
     def OnEnd(self,event):
         self.Close()
 
+class SetupDialog(wx.Dialog):
+    def __init__(self,parent):
+        wx.Dialog.__init__(self,parent=parent,title='设置',size=(300,150))
+        self.Bind(wx.EVT_CLOSE,self.OnClose)
+        panel = wx.Panel(self)
 
+        bigBox = wx.BoxSizer(wx.VERTICAL)
+        self.isproxy = wx.CheckBox(panel,-1,'是否对黑名单使用代理')
+        self.issave = wx.CheckBox(panel,-1,'是否将结果保存为文件')
+
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        txLabel = wx.StaticText(panel,-1,'线程数:')
+        self.thdNumTxt = wx.TextCtrl(panel,-1)
+        hbox.Add(txLabel,proportion=0)
+        hbox.Add(self.thdNumTxt)
+
+        btnBox = wx.BoxSizer(wx.HORIZONTAL)
+        saveBtn = wx.Button(panel,-1,'保存设置')
+        self.Bind(wx.EVT_BUTTON,self.SaveBtn,saveBtn)
+        canelBtn = wx.Button(panel,-1,'取消')
+        self.Bind(wx.EVT_BUTTON,self.OnClose,canelBtn)
+        btnBox.Add(saveBtn,flag=wx.ALIGN_CENTER)
+        btnBox.Add(canelBtn,flag=wx.ALIGN_CENTER)
+
+        bigBox.Add(self.isproxy,flag=wx.ALIGN_CENTER)
+        bigBox.Add(self.issave,flag=wx.ALIGN_CENTER)
+        bigBox.Add(hbox,flag=wx.ALIGN_CENTER)
+        bigBox.Add(btnBox,flag=wx.ALIGN_CENTER)
+        panel.SetSizer(bigBox)
+        self.Show()
+    def OnClose(self,event):
+        #wx.MessageBox('sdf','wer')
+        self.Destroy()
+    def SaveBtn(self,event):
+        flag = self.isproxy.GetValue()
+        self.parent.SetProxy(flag)
 
 if __name__ == '__main__':
     app = wx.App()
@@ -653,4 +706,5 @@ if __name__ == '__main__':
     #win = UpdateBlackDialog(None,'更新黑名单','verified_online.xml')
     #win = MakeWhiteFetDialog(None,'更新白名单样本训练库','List/WhiteList.txt')
     #win = MakeModel(None)
+    #win = SetupDialog(None)
     app.MainLoop()

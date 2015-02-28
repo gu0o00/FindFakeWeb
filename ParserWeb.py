@@ -48,7 +48,7 @@ class ParserWeb:
         in_count = 0
         out_count = 0
         if self.page is not None:
-            html = BeautifulSoup(self.page)
+            self.html = BeautifulSoup(self.page)
             allLink = html.findAll('a')
             l = self.url_parse.netloc.split('.')
             l.pop(0)
@@ -81,6 +81,14 @@ class ParserWeb:
             return info[3].text
         else:
             return '注册时间无法获取'
+    def urlLen(self):
+        return len(self.url)
+    def FormCount(self):
+        formList = self.html.findAll('form')
+        return len(formList)
+    def ImgCount(self):
+        imgList = self.html.findAll('img')
+        return len(imgList)
     def comParser(self):
         resList = [self.url]
         resList.append(self.isIP())
@@ -88,6 +96,9 @@ class ParserWeb:
         resList.append(self.isCopyright())
         resList.append(self.parserLink())
         resList.append(self.urlAge())
+        resList.append(self.urlLen())
+        resList.append(self.FormCount())
+        resList.append(self.ImgCount())
         return resList
     
 if __name__ == '__main__':
@@ -99,3 +110,6 @@ if __name__ == '__main__':
     print pw.isCopyright()
     print '网站的链接个数:',pw.parserLink()
     print pw.urlAge()
+    print pw.urlLen()
+    print pw.FormCount()
+    print pw.ImgCount()

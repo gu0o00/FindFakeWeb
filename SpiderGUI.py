@@ -61,10 +61,11 @@ class Spider(Thread):
 
 class ParserManager(Thread):
     '消费者,从队列中获取url链接，进行分析'
-    def __init__(self,t_name,queue):
+    def __init__(self,t_name,queue,istofile):
         Thread.__init__(self,name = t_name)
         self.urlqueue = queue
         self.is_alive = True
+        self.tofile = istofile
     def run(self):
         '开始从队列中获取url进行分析'
         print '消费者看到队列大小为:',self.urlqueue.qsize()
@@ -72,7 +73,8 @@ class ParserManager(Thread):
         sleep(30)  #根据网速决定延时，应该大于下载首个网页的时间
         while self.urlqueue.qsize() > 0 and self.is_alive:
             try:
-                file_res = open('result.log','a')
+                if self.tofile:
+                    file_res = open('result.log','a')
                 print '\033[0m'
                 print '消费者看到队列大小为:',self.urlqueue.qsize()
                 url = self.urlqueue.get()
@@ -88,25 +90,29 @@ class ParserManager(Thread):
                 tofile +=  unicode(res[3]).encode('utf-8') + ','    #ICP号
                 tofile +=  str(res[4]) + ','                        #链接统计
                 tofile += unicode(res[5]).encode('utf-8')           #注册年龄
-                #表单数
-                #图片数
-                #url长度
-                file_res.write(tofile + os.linesep)
-                file_res.close()
+                tofile += str(res[6])                               #url长度
+                tofile += str(res[7])                               #表单数
+                tofile += str(res[8])                               #图片数
+                if self.tofile:
+                    file_res.write(tofile + os.linesep)
+                    file_res.close()
                 ###############实现机器识别#################################
                 parse_res = MakeSVMFormat(res)
                 res = predict(parse_res)
                 if res < 0:
                     wx.CallAfter(Publisher().sendMessage,'UpdateFakeNum',1)
+                ###########################################################
                 wx.CallAfter(Publisher().sendMessage,'UpdateInfo','结果:'+tofile)
             except UnicodeEncodeError,e:
-                file_res.close()
+                if self.tofile:
+                    file_res.close()
                 print 'UnicodeEncodeError:',
                 print e.reason
                 print res
                 wx.CallAfter(Publisher().sendMessage,'UpdateInfo','网页分析失败:'+str(url))
             except Exception,e:
-                file_res.close()
+                if self.tofile:
+                    file_res.close()
                 print '出现异常:',e
                 wx.CallAfter(Publisher().sendMessage,'UpdateInfo','网页分析失败:'+str(url))
         sleep(1)
