@@ -183,11 +183,11 @@ class FindFakeWebFrame(wx.Frame):
         self.startBtn.Enable()
     def UpdateProc(self,msg):
         info = str(msg.data)
-        self.flText.SetValue(self.flText.Value.encode('utf-8')+info+os.linesep)
+        self.flText.AppendText(info + os.linesep)
         self.flText.ShowPosition(self.flText.GetLastPosition())
     def UpdateInfo(self,msg):
         info = str(msg.data)
-        self.frText.SetValue(self.frText.Value.encode('utf-8')+info+os.linesep)
+        self.frText.AppendText(info + os.linesep)
         self.frText.ShowPosition(self.frText.GetLastPosition())
         self.statusBar.SetStatusText('已经分析完成:' + str(self.finishCount),1)
         self.finishCount += 1
@@ -290,7 +290,7 @@ class UpdateWhiteDialog(wx.Dialog):
         fp.close()
         self.info.SetLabel('获取的链接结果已写入文件')
     def UpdateDisplay(self,msg):
-        self.cont.Value += str(msg.data) + '\n'
+        self.cont.AppendText(str(alink)+os.linesep)
         self.cont.ShowPosition(self.cont.GetLastPosition())
         count = len(str(self.cont.Value).split('\n'))
         self.info.SetLabel('已得到连接数：' + str(count))
@@ -337,7 +337,7 @@ class UpdateBlackDialog(wx.Dialog):
         self.resList = parserXML(self.path)
         self.info.SetLabel('获取到钓鱼网站URL'+str(len(self.resList))+'个')
         for alink in self.resList:
-            self.cont.Value += str(alink) + os.linesep
+            self.cont.AppendText(str(alink)+os.linesep)
         self.cont.ShowPosition(self.cont.GetLastPosition())
     def OnSave(self,event):
         fp = open('List/BlackList.txt','w')
@@ -432,11 +432,8 @@ class MakeBlackFetDialog(wx.Dialog):
     def UpdateDisplay(self,msg):
         txt = str(msg.data)
         if not txt.startswith('#'):
-            self.cont.Value += txt + os.linesep
-            #self.cont.SetValue(str(self.cont.Value)+txt+os.linesep)
             self.count += 1
-        else:
-            self.cont.SetValue(str(self.cont.Value) + txt)
+        self.cont.AppendText(txt + os.linesep)
         self.info.SetLabel('已经完成'+str(self.count)+'个')
 
 class UpdateBlackTrainerWorker(threading.Thread):
@@ -549,10 +546,8 @@ class MakeWhiteFetDialog(wx.Dialog):
     def UpdateDisplay(self,msg):
         txt = str(msg.data)
         if not txt.startswith('#'):
-            self.cont.Value += txt + os.linesep
             self.count += 1
-        else:
-            self.cont.SetValue(str(self.cont.Value) + txt)
+        self.cont.AppendText(txt + os.linesep)
         self.info.SetLabel('已经完成'+str(self.count)+'个')
 
 class UpdateWhiteTrainerWorker(threading.Thread):
@@ -659,7 +654,7 @@ class MakeModelDialog(wx.Dialog):
         import string
         sys.path.append('/home/guojian/Workspaces/FindFakeWeb/libsvm/python')
         import svmutil
-        self.infoTxt.SetValue(str(self.infoTxt.Value) +'模块导入成功' + os.linesep)
+        self.infoTxt.AppendText('模块导入成功' + os.linesep)
         wtf = open(self.wTxt.Value,'r')
         btf = open(self.bTxt.Value,'r')
         wf = wtf.read()
@@ -669,13 +664,13 @@ class MakeModelDialog(wx.Dialog):
         tf = open('train/t.train','w')
         tf.write(wf+bf)
         tf.close()
-        self.infoTxt.SetValue(str(self.infoTxt.Value.encode('utf-8'))+wf+bf+os.linesep)
-        self.infoTxt.SetValue(str(self.infoTxt.Value.encode('utf-8')) +'文件合并完成' + os.linesep)
+        self.infoTxt.AppendText(wf+bf+os.linesep)
+        self.infoTxt.AppendText('文件合并完成' + os.linesep)
         self.infoTxt.ShowPosition(self.infoTxt.GetLastPosition())
         y, x = svmutil.svm_read_problem('train/t.train')
         model = svmutil.svm_train(y, x, '-c 5')
         svmutil.svm_save_model('model_file.model',model)
-        self.infoTxt.SetValue(str(self.infoTxt.Value.encode('utf-8')) +'训练模型构造完成，并且保存为文件model_file.model' + os.linesep)
+        self.infoTxt.AppendText('训练模型构造完成，并且保存为文件model_file.model' + os.linesep)
         self.infoTxt.ShowPosition(self.infoTxt.GetLastPosition())
     def OnEnd(self,event):
         self.Close()
