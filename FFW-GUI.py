@@ -182,11 +182,11 @@ class FindFakeWebFrame(wx.Frame):
             self.parsers[i].is_alive = False
         self.startBtn.Enable()
     def UpdateProc(self,msg):
-        info = str(msg.data)
+        info = msg.data
         self.flText.AppendText(info + os.linesep)
         self.flText.ShowPosition(self.flText.GetLastPosition())
     def UpdateInfo(self,msg):
-        info = str(msg.data)
+        info = msg.data
         self.frText.AppendText(info + os.linesep)
         self.frText.ShowPosition(self.frText.GetLastPosition())
         self.statusBar.SetStatusText('已经分析完成:' + str(self.finishCount),1)

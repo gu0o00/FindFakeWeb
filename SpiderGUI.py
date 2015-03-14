@@ -72,7 +72,7 @@ class ParserManager(Thread):
         '开始从队列中获取url进行分析'
         print '消费者看到队列大小为:',self.urlqueue.qsize()
         url = ''
-        sleep(20)  #根据网速决定延时，应该大于下载首个网页的时间
+        sleep(10)  #根据网速决定延时，应该大于下载首个网页的时间
         while self.urlqueue.qsize() > 0 and self.is_alive:
             try:
                 if self.tofile:
@@ -107,6 +107,9 @@ class ParserManager(Thread):
                 if res < 0:
                     wx.CallAfter(Publisher().sendMessage,'UpdateFakeNum',1)
                     wx.CallAfter(Publisher().sendMessage,'UpdateInfo','结果:'+tofile+os.linesep+'可疑网站')
+                    badfile = open('badweb.txt','w')
+                    badfile.write(url + os.linesep)
+                    badfile.close()
                 else:
                     wx.CallAfter(Publisher().sendMessage,'UpdateInfo','结果:'+tofile+os.linesep+'正常网站')
                 ###########################################################
@@ -116,7 +119,6 @@ class ParserManager(Thread):
                     file_res.close()
                 print 'UnicodeEncodeError:',
                 print e.reason
-                print res
                 wx.CallAfter(Publisher().sendMessage,'UpdateInfo','网页分析失败:'+str(url))
             except Exception,e:
                 if self.tofile:

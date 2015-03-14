@@ -43,13 +43,13 @@ class ParserWeb:
         target = seourl+ self.url_parse.netloc
         page = DownloadWeb(target)
         if page == None:
-            return "该网站暂无备案"
+            return u"该网站暂无备案"
         html = BeautifulSoup(page)
         info = html.findAll('td',attrs={'class':'tdright'})
         if len(info) > 1:
             return info[2].text
         else:
-            return "该网站暂无备案"
+            return u"该网站暂无备案"
     def parserLink(self):
         '分析网站的链接对象，统计出指向本站链接和外站链接的个数'
         allLink = []
@@ -82,13 +82,13 @@ class ParserWeb:
         target = self.url.replace(':','%3a').replace('/','%2f')
         page = DownloadWeb(seourl + target)
         if page == None:
-            return '注册时间无法获取'
+            return u'注册时间无法获取'
         html = BeautifulSoup(page)
         info = html.findAll('font',attrs={'color':'blue'})
         if len(info) > 1:
             return info[3].text
         else:
-            return '注册时间无法获取'
+            return u'注册时间无法获取'
     def urlLen(self):
         return len(self.url)
     def FormCount(self):

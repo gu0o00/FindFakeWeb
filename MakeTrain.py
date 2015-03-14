@@ -129,7 +129,7 @@ def MakeSVMFormat(parse_res):
         day = month[1].split('天'.decode('utf-8'))
         time = int(year[0]) * 365 + int(month[0]) * 30 + int(day[0])
     except :
-        time = '0 '
+        time = 0
     aDict[7] = time
     ########################
     aDict[8] = res[6]
