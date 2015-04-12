@@ -127,7 +127,7 @@ class FindFakeWebFrame(wx.Frame):
         win.ShowModal()
     def OnUpdateBlackList(self,event):
         #wx.MessageBox('更新黑名单','提示:')
-        win = UpdateBlackDialog(None,'更新黑名单','verified_online.xml')
+        win = UpdateBlackDialog(None,'更新黑名单','Black.xml')
         win.ShowModal()
     def OnLookWhiteList(self,event):
         #wx.MessageBox('查看白名单','提示:')
@@ -165,10 +165,7 @@ class FindFakeWebFrame(wx.Frame):
         from Queue import Queue
         self.queue = Queue()
         for i in range(self.thdNum):
-            if i < len(startUtlList)-1:
-                spider = SpiderGUI.Spider('s'+str(i),self.queue,startUtlList[i])
-            else:
-                spider = SpiderGUI.Spider('s'+str(i),self.queue,startUtlList[len(startUtlList)-1])
+            spider = SpiderGUI.Spider('s'+str(i),self.queue,startUtlList[i])
             parser = SpiderGUI.ParserManager('p'+str(i),self.queue,self.issave)
             self.spiders.append(spider)
             self.parsers.append(parser)
@@ -290,7 +287,7 @@ class UpdateWhiteDialog(wx.Dialog):
         fp.close()
         self.info.SetLabel('获取的链接结果已写入文件')
     def UpdateDisplay(self,msg):
-        self.cont.AppendText(str(alink)+os.linesep)
+        self.cont.AppendText(str(msg.data)+os.linesep)
         self.cont.ShowPosition(self.cont.GetLastPosition())
         count = len(str(self.cont.Value).split('\n'))
         self.info.SetLabel('已得到连接数：' + str(count))
